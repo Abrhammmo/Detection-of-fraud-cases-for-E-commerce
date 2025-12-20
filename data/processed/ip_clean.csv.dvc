@@ -1,0 +1,5 @@
+outs:
+- md5: 812e17b0217daab422c938fc1e4a6c22
+  size: 4755946
+  hash: md5
+  path: ip_clean.csv
