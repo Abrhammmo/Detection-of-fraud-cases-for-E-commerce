@@ -53,6 +53,176 @@ A "black box" model is not enough for the fintech industry. We use **SHAP (SHapl
 * **Operational Efficiency:** Automated screening allows security teams to focus on high-probability cases.
 * **Scalability:** The framework is designed to adapt to new datasets as Adey Innovations expands its financial reach.
 
+
+## 🧠 Task 2 — Model Building, Training & Evaluation
+
+### Objective
+
+Design, train, and evaluate **robust classification models** capable of detecting fraudulent transactions in **highly imbalanced datasets**, while ensuring **reproducibility, modularity, and fair model comparison**.
+
+This task focuses on **modeling rigor**, **evaluation correctness**, and **engineering best practices**.
+
 ---
 
-**Would you like me to generate a summary of the SHAP findings specifically for the Credit Card dataset to help refine your business rules?**
+## 📊 1. Data Preparation
+
+### Dataset Separation
+
+Two datasets are modeled **independently** due to different feature spaces and business contexts:
+
+* **E-commerce transactions**
+
+  * Target: `class`
+  * Behavioral + geolocation features
+
+* **Credit card transactions**
+
+  * Target: `Class`
+  * PCA-transformed numerical features (V1–V28)
+
+> The datasets are **not merged** to avoid feature leakage and semantic mismatch.
+
+---
+
+### Stratified Train–Test Split
+
+To preserve the extreme fraud imbalance:
+
+* **Stratified splitting** ensures class distribution consistency
+* Prevents misleading performance inflation
+
+```text
+Train/Test split: 80% / 20%
+Stratification key: fraud label
+```
+
+---
+
+## 🧩 2. Modular Training Pipeline
+
+All modeling logic is implemented in the **`src/` directory** to ensure:
+
+* Reusability
+* Testability
+* CI/CD compatibility
+* Clean notebook execution
+
+### Core Pipeline Components
+
+| Module                 | Responsibility                 |
+| ---------------------- | ------------------------------ |
+| `preprocessing.py`     | Feature preparation & encoding |
+| `split.py`             | Stratified train-test split    |
+| `baseline_model.py`    | Logistic Regression definition |
+| `ensemble_model.py`    | Random Forest model            |
+| `training_pipeline.py` | Unified training & evaluation  |
+
+---
+
+## 📉 3. Baseline Model — Logistic Regression
+
+### Why Logistic Regression?
+
+* Highly interpretable
+* Establishes a **performance floor**
+* Ideal for business explanation and risk justification
+
+### Configuration
+
+* Class weighting to account for imbalance
+* Regularization to reduce overfitting
+
+### Metrics Used
+
+* **F1-Score** → Balance between Precision & Recall
+* **PR-AUC** → Preferred over ROC-AUC for rare events
+* **Confusion Matrix** → Operational error analysis
+
+---
+
+## 🌲 4. Ensemble Model — Random Forest
+
+### Why Random Forest?
+
+* Handles non-linear interactions
+* Robust to noise
+* Strong performance on tabular fraud data
+
+### Tuned Hyperparameters
+
+* `n_estimators`
+* `max_depth`
+* `min_samples_split`
+
+### Strengths
+
+* Captures behavioral patterns
+* Learns complex fraud signatures
+* Resistant to overfitting compared to single trees
+
+---
+
+## ⚖️ 5. Evaluation Strategy (Imbalanced Learning)
+
+Fraud detection is **not an accuracy problem**.
+
+### Chosen Metrics
+
+| Metric               | Justification                               |
+| -------------------- | ------------------------------------------- |
+| **F1-Score**         | Penalizes false positives & false negatives |
+| **PR-AUC**           | Focuses on minority (fraud) class           |
+| **Confusion Matrix** | Business-impact clarity                     |
+
+> ROC-AUC is avoided as it can be misleading under extreme imbalance.
+
+---
+
+## 🔍 6. Cross-Dataset Model Comparison
+
+Models are trained and evaluated **separately** on:
+
+* Fraud (E-commerce) dataset
+* Credit Card dataset
+
+### Observed Patterns
+
+* Random Forest significantly outperforms Logistic Regression
+* Credit card data benefits from PCA-engineered features
+* E-commerce data benefits from behavioral + geolocation features
+
+---
+
+## 🧪 7. Validation & Testing
+
+To ensure robustness:
+
+* **Unit tests** validate pipeline execution
+* Metrics are sanity-checked (0 ≤ score ≤ 1)
+* Training is deterministic via fixed random seeds
+
+```bash
+pytest
+```
+
+---
+
+## 🏆 8. Model Selection & Justification
+
+| Model               | Selection Reason                         |
+| ------------------- | ---------------------------------------- |
+| Logistic Regression | Interpretability & baseline benchmarking |
+| Random Forest       | Best overall fraud detection performance |
+
+**Final choice:**
+✔ **Random Forest** for production detection
+✔ **Logistic Regression** for explainability & audits
+
+---
+
+## 🎯 Business Value Delivered
+
+* ✔ Reduced false negatives → lower financial loss
+* ✔ Controlled false positives → better user experience
+* ✔ Scalable pipeline → multi-platform deployment
+* ✔ Reproducible experiments → governance & compliance
