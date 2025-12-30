@@ -18,6 +18,10 @@ def preprocess_fraud(df):
         df['country_freq'] = df['country'].map(freq_enc)
         df.drop(columns=['country'], inplace=True)
     
+    # Drop ip_address as it's string and not useful
+    if 'ip_address' in df.columns:
+        df.drop(columns=['ip_address'], inplace=True)
+    
     # Example: Time features - only if columns exist
     if 'purchase_time' in df.columns and 'signup_time' in df.columns:
         df['purchase_time'] = pd.to_datetime(df['purchase_time'])
